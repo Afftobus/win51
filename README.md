@@ -50,7 +50,7 @@ Very likely, if all of the following hold:
 
 A PortCls WaveRT miniport driver (KMDF 1.15) derived from Microsoft's [SimpleAudioSample](https://github.com/microsoft/Windows-driver-samples/tree/main/audio/simpleaudiosample). It is a root-enumerated device (`ROOT\Win51`) with a single render endpoint and no hardware behind it.
 
-- **Formats.** 48 kHz, 6 channels: 32-bit float, 24-in-32-bit PCM or 16-bit PCM. Each format comes with channel mask `0x60F` (5.1, side surrounds) and `0x3F` (5.1, back surrounds). The default format and speaker setup are float 5.1 with side surrounds.
+- **Formats.** 48 kHz, 6 channels: 32-bit float (the default), 24-in-32-bit PCM or 16-bit PCM. There is one speaker setup, *5.1 Surround* with back surrounds (channel mask `0x3F`); AC-3 has a single surround pair, and the Windows mixer folds side channels of other content into it.
 - **Clock.** The DMA position is computed from QPC time, and a 1 ms high-resolution timer signals buffer completion in event-driven mode. The driver never touches the audio data: Windows mixes into the WaveRT buffer and the service reads the mix through loopback.
 - **Volume.** There are no volume or mute nodes, so Windows applies the volume slider in software and it ends up in the encoded stream.
 - **Single stream.** The endpoint has one system stream pin, which the Windows audio engine uses.

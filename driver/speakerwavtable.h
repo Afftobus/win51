@@ -15,8 +15,10 @@ Abstract:
 #define _WIN51_SPEAKERWAVTABLE_H_
 
 // The endpoint is a fixed 5.1 device: 48 KHz, 6 channels, 16-bit / 24-in-32-bit PCM
-// or 32-bit float. Each sample format is listed with both 5.1 channel masks
-// (side and back surrounds) because Windows and applications use either one.
+// or 32-bit float, one channel mask: KSAUDIO_SPEAKER_5POINT1 (back surrounds). With
+// the side-surround mask as well, Windows' speaker setup offered two "5.1 Surround"
+// entries; AC3 has a single surround pair either way, and the Windows mixer folds
+// side channels of other content into the back ones.
 
 #define SPEAKER_DEVICE_MAX_CHANNELS                 6       // Max Channels.
 
@@ -64,12 +66,9 @@ Abstract:
 static
 KSDATAFORMAT_WAVEFORMATEXTENSIBLE SpeakerHostPinSupportedDeviceFormats[] =
 {
-    // 0: default format - 32-bit float, 5.1 with side surrounds
-    WIN51_WAVE_FORMAT(STATIC_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 32, 32, KSAUDIO_SPEAKER_5POINT1_SURROUND),
+    // 0: default format - 32-bit float
     WIN51_WAVE_FORMAT(STATIC_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, 32, 32, KSAUDIO_SPEAKER_5POINT1),
-    WIN51_WAVE_FORMAT(STATIC_KSDATAFORMAT_SUBTYPE_PCM,        32, 24, KSAUDIO_SPEAKER_5POINT1_SURROUND),
     WIN51_WAVE_FORMAT(STATIC_KSDATAFORMAT_SUBTYPE_PCM,        32, 24, KSAUDIO_SPEAKER_5POINT1),
-    WIN51_WAVE_FORMAT(STATIC_KSDATAFORMAT_SUBTYPE_PCM,        16, 16, KSAUDIO_SPEAKER_5POINT1_SURROUND),
     WIN51_WAVE_FORMAT(STATIC_KSDATAFORMAT_SUBTYPE_PCM,        16, 16, KSAUDIO_SPEAKER_5POINT1),
 };
 

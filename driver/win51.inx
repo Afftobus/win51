@@ -71,11 +71,11 @@ HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
 HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,0x00010001,0x1
 
 ; Default device format: VT_BLOB, 40 bytes of WAVEFORMATEXTENSIBLE:
-; 48000 Hz, 6 channels, 32-bit IEEE float, channel mask 0x60F (5.1 with side surrounds).
-HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,00,00,28,00,00,00,FE,FF,06,00,80,BB,00,00,00,94,11,00,18,00,20,00,16,00,20,00,0F,06,00,00,03,00,00,00,00,00,10,00,80,00,00,AA,00,38,9B,71
+; 48000 Hz, 6 channels, 32-bit IEEE float, channel mask 0x3F (5.1 with back surrounds).
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,00,00,28,00,00,00,FE,FF,06,00,80,BB,00,00,00,94,11,00,18,00,20,00,16,00,20,00,3F,00,00,00,03,00,00,00,00,00,10,00,80,00,00,AA,00,38,9B,71
 
-; Default speaker configuration: 5.1 with side surrounds.
-HKR,EP\0,%PKEY_AudioEndpoint_PhysicalSpeakers%,0x00010001,0x0000060F
+; Default speaker configuration: 5.1 with back surrounds.
+HKR,EP\0,%PKEY_AudioEndpoint_PhysicalSpeakers%,0x00010001,0x0000003F
 
 ;======================================================
 ; WIN51_SA

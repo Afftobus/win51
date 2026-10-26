@@ -15,7 +15,7 @@ Win51 is a virtual 5.1 audio output for Windows whose mix is encoded to AC-3 and
 
 | Path | Contents |
 |---|---|
-| `driver/speakerwavtable.h` | Endpoint formats (48 kHz, 6 ch, float/PCM32/PCM16, masks 0x60F and 0x3F) and data ranges |
+| `driver/speakerwavtable.h` | Endpoint formats (48 kHz, 6 ch, float/PCM32/PCM16, mask 0x3F only) and data ranges |
 | `driver/speakertoptable.h` | Topology: deliberately no volume/mute nodes |
 | `driver/minwavertstream.cpp` | WaveRT stream: buffer, `UpdatePosition` (64-bit math), 1 ms notification timer |
 | `driver/minwavert.cpp` | Wave miniport, `DataRangeIntersection` |
@@ -43,11 +43,12 @@ Win51 is a virtual 5.1 audio output for Windows whose mix is encoded to AC-3 and
 
 ## Invariants — keep these consistent across files
 
-- **Channel order and mask.** The order is FL FR FC LFE SL SR, `KSAUDIO_SPEAKER_5POINT1_SURROUND` (0x60F). It appears in:
+- **Channel masks.** Windows sees exactly one configuration, `KSAUDIO_SPEAKER_5POINT1` (0x3F, back surrounds). It is set in:
   - the driver formats (`speakerwavtable.h`) and the jack channel mapping (`speakertoptable.h`);
-  - the INF (`PKEY_AudioEndpoint_PhysicalSpeakers` and the OEMFormat blob);
-  - the service (`kMask51Side`, the channel map in `LoopbackSource::Open`);
-  - the encoder: libavcodec's native order for that mask is the same, so no reordering happens.
+  - the INF (`PKEY_AudioEndpoint_PhysicalSpeakers` and the OEMFormat blob).
+
+  A second mask makes the speaker setup list two "5.1 Surround" entries. `IsFormatSupported` matches the mask exactly, so the format table alone decides what Windows offers.
+- **Encoder order.** Inside the service the order is FL FR FC LFE SL SR (`kMask51Side`, 0x60F). That is libavcodec's native order, so no reordering happens. `LoopbackSource::Open` maps back and side surrounds of any mix format onto SL/SR: AC-3 has one surround pair either way.
 - **48 kHz only**, in the driver ranges and in the service checks.
 - **IEC 61937 for AC-3:** a burst of 1536 frames × 4 bytes = 6144 bytes; `Pa=0xF872`, `Pb=0x4E1F`, `Pc = 1 | bsmod << 8`, `Pd` = payload length in bits; payload byte-swapped into 16-bit words.
 - **The HDMI output never stops.** Silence is encoded too, so the receiver stays locked. Do not "optimise" this away.

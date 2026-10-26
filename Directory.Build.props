@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Win51VersionMajor>1</Win51VersionMajor>
     <Win51VersionMinor>0</Win51VersionMinor>
-    <Win51VersionPatch>0</Win51VersionPatch>
+    <Win51VersionPatch>1</Win51VersionPatch>
     <Win51Version>$(Win51VersionMajor).$(Win51VersionMinor).$(Win51VersionPatch).0</Win51Version>
     <Win51VersionDefines>WIN51_VERSION_DOTTED=$(Win51Version);WIN51_VERSION_NUM=$(Win51VersionMajor),$(Win51VersionMinor),$(Win51VersionPatch),0</Win51VersionDefines>
   </PropertyGroup>
