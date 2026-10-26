@@ -1,0 +1,47 @@
+/*++
+
+Copyright (c) Microsoft Corporation All Rights Reserved
+
+Module Name:
+
+    win51.rc
+
+Abstract:
+
+    Version resource. Keep the version in step with <TimeStamp> in win51.vcxproj (the INF DriverVer).
+
+--*/
+
+#include <windows.h>
+
+#define WIN51_VERSION       1,0,0,0
+#define WIN51_VERSION_STR   "1.0.0.0"
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION     WIN51_VERSION
+    PRODUCTVERSION  WIN51_VERSION
+    FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+    FILEFLAGS       0
+    FILEOS          VOS_NT_WINDOWS32
+    FILETYPE        VFT_DRV
+    FILESUBTYPE     VFT2_DRV_SOUND
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "Win51"
+            VALUE "FileDescription",  "Win51 AC3 5.1 virtual audio driver"
+            VALUE "FileVersion",      WIN51_VERSION_STR
+            VALUE "InternalName",     "win51.sys"
+            VALUE "LegalCopyright",   "Copyright (c) Microsoft Corporation (MS-PL); Win51 contributors"
+            VALUE "OriginalFilename", "win51.sys"
+            VALUE "ProductName",      "Win51"
+            VALUE "ProductVersion",   WIN51_VERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

@@ -1,0 +1,162 @@
+;
+; win51.inx - virtual 5.1 audio output. The 6-channel stream rendered to this
+; endpoint is encoded to AC3 by the Win51 user-mode service and sent to HDMI.
+;
+; Based on the Microsoft SimpleAudioSample driver (MS-PL), see LICENSE-MS-PL.txt.
+;
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = MEDIA
+Provider    = %ProviderName%
+ClassGUID   = {4d36e96c-e325-11ce-bfc1-08002be10318}
+DriverVer   = 10/26/2026, 1.0.0.0   ; set by stampinf at build time
+CatalogFile = win51.cat
+PnpLockDown = 1
+
+[SourceDisksNames]
+222="Win51 Driver Disk","",222
+
+[SourceDisksFiles]
+win51.sys=222
+
+[Manufacturer]
+%MfgName%=WIN51,NT$ARCH$.10.0...19041
+
+[WIN51.NT$ARCH$.10.0...19041]
+%WIN51_SA.DeviceDesc%=WIN51_SA, ROOT\Win51
+
+[DestinationDirs]
+WIN51_SA.CopyList=13   ; 13=Package's DriverStore directory
+
+;======================================================
+; WIN51_SA
+;======================================================
+[WIN51_SA.CopyList]
+win51.sys
+
+[WIN51_SA.AddReg]
+HKR,,AssociatedFilters,,"wdmaud,swmidi,redbook"
+HKR,,Driver,,win51.sys
+
+HKR,Drivers,SubClasses,,"wave,midi,mixer"
+
+HKR,Drivers\wave\wdmaud.drv,Driver,,wdmaud.drv
+HKR,Drivers\midi\wdmaud.drv,Driver,,wdmaud.drv
+HKR,Drivers\mixer\wdmaud.drv,Driver,,wdmaud.drv
+
+HKR,Drivers\wave\wdmaud.drv,Description,,%WIN51_SA.DeviceDesc%
+HKR,Drivers\mixer\wdmaud.drv,Description,,%WIN51_SA.DeviceDesc%
+
+;======================================================
+; render interfaces: 5.1 output
+;======================================================
+[WIN51.I.WaveSpeaker]
+AddReg=WIN51.I.WaveSpeaker.AddReg
+
+[WIN51.I.WaveSpeaker.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%WIN51.WaveSpeaker.szPname%
+
+[WIN51.I.TopologySpeaker]
+AddReg=WIN51.I.TopologySpeaker.AddReg
+
+[WIN51.I.TopologySpeaker.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%WIN51.TopologySpeaker.szPname%
+
+HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
+
+; The following line opts in to pull (event driven) mode.
+HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,0x00010001,0x1
+
+; Default device format: VT_BLOB, 40 bytes of WAVEFORMATEXTENSIBLE:
+; 48000 Hz, 6 channels, 32-bit IEEE float, channel mask 0x60F (5.1 with side surrounds).
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,00,00,28,00,00,00,FE,FF,06,00,80,BB,00,00,00,94,11,00,18,00,20,00,16,00,20,00,0F,06,00,00,03,00,00,00,00,00,10,00,80,00,00,AA,00,38,9B,71
+
+; Default speaker configuration: 5.1 with side surrounds.
+HKR,EP\0,%PKEY_AudioEndpoint_PhysicalSpeakers%,0x00010001,0x0000060F
+
+;======================================================
+; WIN51_SA
+;======================================================
+[WIN51_SA.NT]
+Include=ks.inf,wdmaudio.inf
+Needs=KS.Registration, WDMAUDIO.Registration
+CopyFiles=WIN51_SA.CopyList
+AddReg=WIN51_SA.AddReg
+
+[WIN51_SA.NT.Interfaces]
+;
+; Interfaces for the 5.1 render endpoint.
+;
+AddInterface=%KSCATEGORY_AUDIO%, %KSNAME_WaveSpeaker%, WIN51.I.WaveSpeaker
+AddInterface=%KSCATEGORY_RENDER%, %KSNAME_WaveSpeaker%, WIN51.I.WaveSpeaker
+AddInterface=%KSCATEGORY_REALTIME%, %KSNAME_WaveSpeaker%, WIN51.I.WaveSpeaker
+AddInterface=%KSCATEGORY_AUDIO%, %KSNAME_TopologySpeaker%, WIN51.I.TopologySpeaker
+AddInterface=%KSCATEGORY_TOPOLOGY%, %KSNAME_TopologySpeaker%, WIN51.I.TopologySpeaker
+
+[WIN51_SA.NT.Services]
+AddService=Win51,0x00000002,Win51_Service_Inst
+
+[Win51_Service_Inst]
+DisplayName=%Win51.SvcDesc%
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%13%\win51.sys
+
+[WIN51_SA.NT.HW]
+AddReg = AUDIOHW.AddReg
+
+[AUDIOHW.AddReg]
+; FILE_DEVICE_SOUND
+HKR,,DeviceType,0x10001,0x0000001D
+; SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX
+HKR,,Security,,"D:P(A;;GA;;;SY)(A;;GRGWGX;;;BA)(A;;GRGWGX;;;WD)(A;;GRGWGX;;;RC)"
+
+
+;======================================================
+; WDF
+;======================================================
+[WIN51_SA.NT.Wdf]
+KmdfService = Win51, WIN51_SA_WdfSect
+[WIN51_SA_WdfSect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+;======================================================
+; COMMON
+;======================================================
+[Strings]
+
+;Non-localizable
+
+KSNAME_WaveSpeaker="WaveSpeaker"
+KSNAME_TopologySpeaker="TopologySpeaker"
+
+Proxy.CLSID="{17CCA71B-ECD7-11D0-B908-00A0C9223196}"
+KSCATEGORY_AUDIO="{6994AD04-93EF-11D0-A3CC-00A0C9223196}"
+KSCATEGORY_RENDER="{65E8773E-8F56-11D0-A3B9-00A0C9223196}"
+KSCATEGORY_REALTIME ="{EB115FFC-10C8-4964-831D-6DCB02E6F23F}"
+KSCATEGORY_TOPOLOGY = "{DDA54A40-1E4C-11D1-A050-405705C10000}"
+
+KSNODETYPE_ANY   = "{00000000-0000-0000-0000-000000000000}"
+
+PKEY_AudioEndpoint_Association               = "{1DA5D803-D492-4EDD-8C23-E0C0FFEE7F0E},2"
+PKEY_AudioEndpoint_PhysicalSpeakers          = "{1DA5D803-D492-4EDD-8C23-E0C0FFEE7F0E},3"
+PKEY_AudioEndpoint_Supports_EventDriven_Mode = "{1DA5D803-D492-4EDD-8C23-E0C0FFEE7F0E},7"
+PKEY_AudioEngine_OEMFormat                   = "{E4870E26-3CC5-4CD2-BA46-CA0A9A70ED04},3"
+
+REG_BINARY = 0x00000001
+
+;Localizable
+
+ProviderName = "Win51"
+MfgName      = "Win51"
+
+WIN51_SA.DeviceDesc="Win51 AC3 5.1"
+Win51.SvcDesc="Win51 AC3 5.1 virtual audio driver"
+
+;; friendly names
+WIN51.WaveSpeaker.szPname="Win51 Wave 5.1"
+WIN51.TopologySpeaker.szPname="Win51 Topology 5.1"

@@ -1,0 +1,11 @@
+# Build output and local build dependencies (EWDK ISO, FFmpeg), see tools\build.ps1
+out/
+deps/
+x64/
+.vs/
+*.user
+*.aps
+
+# IDE
+.idea/
+*.iml
