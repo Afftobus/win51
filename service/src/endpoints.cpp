@@ -30,6 +30,20 @@ bool SupportsExclusiveAc3(IMMDevice* device) {
     return client->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &legacy, nullptr) == S_OK;
 }
 
+UINT EndpointFormFactorOf(IMMDevice* device) {
+    // PKEY_AudioEndpoint_FormFactor; HDMI and DisplayPort outputs report DigitalAudioDisplayDevice.
+    static const PROPERTYKEY kFormFactor = {{0x1da5d803, 0xd492, 0x4edd, {0x8c, 0x23, 0xe0, 0xc0, 0xff, 0xee, 0x7f, 0x0e}}, 0};
+    UINT result = UnknownFormFactor;
+    ComPtr<IPropertyStore> props;
+    if (SUCCEEDED(device->OpenPropertyStore(STGM_READ, props.GetAddressOf()))) {
+        PROPVARIANT v;
+        PropVariantInit(&v);
+        if (SUCCEEDED(props->GetValue(kFormFactor, &v)) && v.vt == VT_UI4) result = v.ulVal;
+        PropVariantClear(&v);
+    }
+    return result;
+}
+
 bool ContainsNoCase(const std::wstring& haystack, const std::wstring& needle) {
     if (needle.empty()) return true;
     return FindNLSStringEx(LOCALE_NAME_INVARIANT, FIND_FROMSTART | NORM_IGNORECASE, haystack.c_str(),
@@ -79,9 +93,6 @@ HRESULT FindRenderEndpoint(const std::wstring& nameSubstring, EndpointInfo& out)
 }
 
 HRESULT FindAc3PassthroughEndpoint(EndpointInfo& out) {
-    // PKEY_AudioEndpoint_FormFactor; HDMI and DisplayPort outputs report DigitalAudioDisplayDevice.
-    static const PROPERTYKEY kFormFactor = {{0x1da5d803, 0xd492, 0x4edd, {0x8c, 0x23, 0xe0, 0xc0, 0xff, 0xee, 0x7f, 0x0e}}, 0};
-
     std::wstring defaultId;
     ComPtr<IMMDeviceEnumerator> enumerator;
     if (SUCCEEDED(CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
@@ -100,16 +111,8 @@ HRESULT FindAc3PassthroughEndpoint(EndpointInfo& out) {
     int bestScore = -1;
     for (auto& ep : ListRenderEndpoints(DEVICE_STATE_ACTIVE)) {
         if (ContainsNoCase(ep.name, kWin51EndpointName)) continue;
-        bool display = false;
-        ComPtr<IPropertyStore> props;
-        if (SUCCEEDED(ep.device->OpenPropertyStore(STGM_READ, props.GetAddressOf()))) {
-            PROPVARIANT v;
-            PropVariantInit(&v);
-            display = SUCCEEDED(props->GetValue(kFormFactor, &v)) && v.vt == VT_UI4 &&
-                      v.ulVal == DigitalAudioDisplayDevice;
-            PropVariantClear(&v);
-        }
-        if (!display || !SupportsExclusiveAc3(ep.device.Get())) continue;
+        if (EndpointFormFactorOf(ep.device.Get()) != DigitalAudioDisplayDevice) continue;
+        if (!SupportsExclusiveAc3(ep.device.Get())) continue;
         const int score = ep.id == defaultId ? 1 : 0;
         if (score > bestScore) {
             bestScore = score;

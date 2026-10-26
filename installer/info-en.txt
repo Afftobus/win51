@@ -1,0 +1,14 @@
+﻿Win51 adds a 5.1 sound device to Windows. Everything played to it is encoded to Dolby Digital (AC-3) in real time and sent over HDMI as a bitstream, so a TV and an AV receiver behind it play real 5.1.
+
+Setup will:
+- turn on Windows test mode, unless it is already on. The driver is signed with a test certificate, and Windows loads such drivers only in test mode. Secure Boot must be off. Windows shows "Test Mode" in a corner of the desktop;
+- trust the Win51 test certificate;
+- install the driver, the Win51 AC3 encoder service and the tray icon.
+
+If test mode had to be turned on, restart Windows when setup finishes.
+
+Games with kernel-level anti-cheat (Riot Vanguard, FACEIT and some others) do not start in test mode. Uninstalling Win51 turns test mode off again if setup turned it on.
+
+After installation, in Control Panel > Sound:
+- make "Speakers (Win51 AC3 5.1)" the default device;
+- in its Properties > Advanced, untick "Allow applications to take exclusive control of this device".

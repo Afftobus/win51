@@ -6,7 +6,6 @@
 #include <mmdeviceapi.h>
 #include <wrl/client.h>
 
-#include <atomic>
 #include <functional>
 
 namespace w51 {
@@ -23,13 +22,15 @@ public:
     HdmiOutput& operator=(const HdmiOutput&) = delete;
     ~HdmiOutput();
 
-    // requestedPeriod in 100 ns units; 0 selects the device's minimum period.
+    // requestedPeriod in 100 ns units; 0 selects the device's minimum period. Logs only on success:
+    // the caller decides how often a failure (e.g. AUDCLNT_E_DEVICE_IN_USE) is worth a log line.
     HRESULT Open(IMMDevice* device, REFERENCE_TIME requestedPeriod);
     void Close();
 
-    // Pre-fills one buffer, starts the stream and services it until `stop` is set or a stream error
-    // occurs (e.g. AUDCLNT_E_DEVICE_INVALIDATED when the TV is switched off). Runs on the calling thread.
-    HRESULT Run(const std::atomic<bool>& stop, const FillFn& fill);
+    // Pre-fills one buffer, starts the stream and services it until stopRequested() returns true or a
+    // stream error occurs (e.g. AUDCLNT_E_DEVICE_INVALIDATED when the TV is switched off). Runs on the
+    // calling thread; stopRequested() is checked once per period.
+    HRESULT Run(const std::function<bool()>& stopRequested, const FillFn& fill);
 
     UINT32 BufferFrames() const { return bufferFrames_; }
     REFERENCE_TIME Period() const { return period_; }

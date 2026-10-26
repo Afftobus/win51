@@ -1,0 +1,38 @@
+// Icons and version resource of win51tray.exe; WIN51_VERSION_* come from Directory.Build.props.
+#include <windows.h>
+
+#include "src/resource.h"
+#include "win51_version.h"
+
+IDI_OK   ICON "res/ok.ico"
+IDI_WAIT ICON "res/wait.ico"
+IDI_OFF  ICON "res/off.ico"
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION     WIN51_VERSION_NUM
+    PRODUCTVERSION  WIN51_VERSION_NUM
+    FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+    FILEFLAGS       0
+    FILEOS          VOS_NT_WINDOWS32
+    FILETYPE        VFT_APP
+    FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "Win51"
+            VALUE "FileDescription",  "Win51 tray icon"
+            VALUE "FileVersion",      WIN51_VERSION_STR
+            VALUE "InternalName",     "win51tray"
+            VALUE "LegalCopyright",   "Win51 contributors, MIT license"
+            VALUE "OriginalFilename", "win51tray.exe"
+            VALUE "ProductName",      "Win51"
+            VALUE "ProductVersion",   WIN51_VERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

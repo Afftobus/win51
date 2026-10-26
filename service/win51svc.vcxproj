@@ -37,6 +37,7 @@
   <PropertyGroup>
     <TargetName>win51svc</TargetName>
     <ExternalIncludePath>$(FfmpegDir)\include;$(ExternalIncludePath)</ExternalIncludePath>
+    <IncludePath>$(MSBuildThisFileDirectory)..\shared;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -49,7 +50,7 @@
       <ConformanceMode>true</ConformanceMode>
       <!-- Sources are UTF-8; without this MSVC reads them in the build machine's ANSI code page. -->
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>NOMINMAX;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_UNICODE;UNICODE;$(Win51VersionDefines);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <!-- Static CRT: no Visual C++ redistributable needed on the target. -->
       <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreaded</RuntimeLibrary>
       <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebug</RuntimeLibrary>
@@ -57,8 +58,11 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalLibraryDirectories>$(FfmpegDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>avcodec.lib;avutil.lib;ole32.lib;avrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>avcodec.lib;avutil.lib;ole32.lib;avrt.lib;setupapi.lib;newdev.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>$(Win51VersionDefines);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
     <PostBuildEvent>
       <Command>copy /Y "$(FfmpegDir)\bin\*.dll" "$(OutDir)" &gt; nul</Command>
       <Message>Copying FFmpeg DLLs</Message>
@@ -66,14 +70,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\ac3_encoder.cpp" />
+    <ClCompile Include="src\control_pipe.cpp" />
+    <ClCompile Include="src\device_setup.cpp" />
     <ClCompile Include="src\endpoints.cpp" />
     <ClCompile Include="src\hdmi_output.cpp" />
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pcm_source.cpp" />
+    <ClCompile Include="src\pipeline.cpp" />
+    <ClCompile Include="src\settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\*.h" />
+    <ClInclude Include="..\shared\*.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="win51svc.rc" />

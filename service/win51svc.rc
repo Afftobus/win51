@@ -1,12 +1,11 @@
-// Version resource of win51svc.exe; keep in step with driver\win51.rc.
+// Version resource of win51svc.exe; WIN51_VERSION_* come from Directory.Build.props.
 #include <windows.h>
 
-#define WIN51_VERSION       1,0,0,0
-#define WIN51_VERSION_STR   "1.0.0.0"
+#include "win51_version.h"
 
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION     WIN51_VERSION
-    PRODUCTVERSION  WIN51_VERSION
+    FILEVERSION     WIN51_VERSION_NUM
+    PRODUCTVERSION  WIN51_VERSION_NUM
     FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
     FILEFLAGS       0
     FILEOS          VOS_NT_WINDOWS32

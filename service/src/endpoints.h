@@ -32,6 +32,9 @@ HRESULT FindAc3PassthroughEndpoint(EndpointInfo& out);
 // True if the device accepts AC3 over IEC 61937 (2ch 16-bit 48 kHz) in exclusive mode.
 bool SupportsExclusiveAc3(IMMDevice* device);
 
+// PKEY_AudioEndpoint_FormFactor (EndpointFormFactor), UnknownFormFactor if it is not set.
+UINT EndpointFormFactorOf(IMMDevice* device);
+
 bool ContainsNoCase(const std::wstring& haystack, const std::wstring& needle);
 
 // Name fragment that identifies the Win51 virtual endpoint (INF device description).

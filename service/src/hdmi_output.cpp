@@ -46,10 +46,7 @@ HRESULT HdmiOutput::Open(IMMDevice* device, REFERENCE_TIME requestedPeriod) {
     if (client_->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &format_.Format, nullptr) != S_OK) {
         WAVEFORMATEX legacy = iec61937::Ac3FormatLegacy();
         HRESULT hr = client_->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE, &legacy, nullptr);
-        if (hr != S_OK) {
-            Log("HDMI output does not accept AC3 passthrough in exclusive mode: %s", HrToString(hr).c_str());
-            return FAILED(hr) ? hr : AUDCLNT_E_UNSUPPORTED_FORMAT;
-        }
+        if (hr != S_OK) return FAILED(hr) ? hr : AUDCLNT_E_UNSUPPORTED_FORMAT;
         format_ = {};
         format_.Format = legacy;
         formatName = "WAVE_FORMAT_DOLBY_AC3_SPDIF";
@@ -64,10 +61,7 @@ HRESULT HdmiOutput::Open(IMMDevice* device, REFERENCE_TIME requestedPeriod) {
         Log("HDMI output: period not aligned, retrying with %u frames (%.2f ms)", alignedFrames, period / 10000.0);
         hr = Initialize(period);
     }
-    if (FAILED(hr)) {
-        Log("HDMI output: exclusive Initialize failed: %s", HrToString(hr).c_str());
-        return hr;
-    }
+    if (FAILED(hr)) return hr;  // AUDCLNT_E_DEVICE_IN_USE: another program holds the output exclusively
 
     event_ = CreateEventW(nullptr, FALSE, FALSE, nullptr);
     if (!event_) return HRESULT_FROM_WIN32(GetLastError());
@@ -85,7 +79,7 @@ HRESULT HdmiOutput::Open(IMMDevice* device, REFERENCE_TIME requestedPeriod) {
     return S_OK;
 }
 
-HRESULT HdmiOutput::Run(const std::atomic<bool>& stop, const FillFn& fill) {
+HRESULT HdmiOutput::Run(const std::function<bool()>& stopRequested, const FillFn& fill) {
     BYTE* data = nullptr;
     W51_RETURN_IF_FAILED(render_->GetBuffer(bufferFrames_, &data));
     fill(data, bufferFrames_);
@@ -97,7 +91,7 @@ HRESULT HdmiOutput::Run(const std::atomic<bool>& stop, const FillFn& fill) {
 
     HRESULT hr = client_->Start();
     int timeouts = 0;
-    while (SUCCEEDED(hr) && !stop.load(std::memory_order_relaxed)) {
+    while (SUCCEEDED(hr) && !stopRequested()) {
         DWORD wait = WaitForSingleObject(event_, 1000);
         if (wait == WAIT_TIMEOUT) {
             Log("HDMI output: no buffer event for 1 s");

@@ -54,8 +54,8 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32;UNICODE;_UNICODE;PC_IMPLEMENTATION;DEBUG_LEVEL=DEBUGLVL_TERSE;_USE_WAVERT_;_NEW_DELETE_OPERATORS_</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH);.</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32;UNICODE;_UNICODE;PC_IMPLEMENTATION;DEBUG_LEVEL=DEBUGLVL_TERSE</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH);.;..\shared</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_WIN32;UNICODE;_UNICODE;PC_IMPLEMENTATION;DEBUG_LEVEL=DEBUGLVL_TERSE;$(Win51VersionDefines)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies);$(DDK_LIB_PATH)\portcls.lib;$(DDK_LIB_PATH)\stdunk.lib;$(DDK_LIB_PATH)\libcntpr.lib</AdditionalDependencies>
@@ -63,10 +63,10 @@
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
     </DriverSign>
-    <!-- DriverVer version; stampinf would otherwise use the build time. Keep in step with win51.rc. -->
+    <!-- DriverVer version (Directory.Build.props); stampinf would otherwise stamp the build time. -->
     <Inf>
       <SpecifyDriverVerDirectiveVersion>true</SpecifyDriverVerDirectiveVersion>
-      <TimeStamp>1.0.0.0</TimeStamp>
+      <TimeStamp>$(Win51Version)</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemGroup>

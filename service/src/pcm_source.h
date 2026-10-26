@@ -54,6 +54,9 @@ public:
     virtual void Pull(float* dst) = 0;
     // Appends a human-readable summary of the last interval and resets interval counters.
     virtual std::string TakeStats() { return {}; }
+    // For the status: the source is connected (the Win51 endpoint exists) and audio arrived recently.
+    virtual bool Connected() const { return true; }
+    virtual bool Playing() const { return false; }
 };
 
 // Channel identification signal: noise bursts on FL, FC, FR, SR, SL and a 35-90 Hz sweep on LFE.
@@ -83,6 +86,8 @@ public:
     void Tick() override;
     void Pull(float* dst) override;
     std::string TakeStats() override;
+    bool Connected() const override { return connected_; }
+    bool Playing() const override { return GetTickCount64() - lastPacketTick_ < 500; }
 
 private:
     HRESULT Open();
@@ -100,6 +105,7 @@ private:
     ULONGLONG nextOpenTick_ = 0;
     bool openFailureLogged_ = false;
     std::atomic<bool> connected_{false};
+    std::atomic<ULONGLONG> lastPacketTick_{0};  // Windows sends no packets while nothing plays
 
     PcmFifo fifo_;
     size_t leadIn_ = 0;  // frames of silence played ahead of the FIFO contents, see Pull()

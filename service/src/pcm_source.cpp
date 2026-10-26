@@ -224,6 +224,7 @@ void LoopbackSource::Append(const BYTE* data, UINT32 frames, DWORD flags) {
         }
     }
     const size_t lost = fifo_.Push(scratch_.data(), frames);
+    lastPacketTick_ = GetTickCount64();
 
     std::lock_guard<std::mutex> lock(statsMutex_);
     stats_.capturedFrames += frames;
